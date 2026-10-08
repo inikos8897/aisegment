@@ -422,6 +422,99 @@
     background: #059669;
     color: #fff;
   }
+  /* Table Column Filter Styles */
+  .crm-filter-row th {
+    background: var(--bg-card);
+    border-bottom: 2px solid var(--border-color);
+    padding: 7px 6px;
+    font-weight: 500;
+  }
+  .filter-col-input, .filter-col-select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-subtle);
+    color: var(--text-main);
+    font-size: 11px;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.15s ease;
+  }
+  .filter-col-input:focus, .filter-col-select:focus {
+    border-color: var(--accent);
+    background: var(--bg-card);
+    box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.15);
+  }
+  .filter-col-input.has-value, .filter-col-select.has-value {
+    border-color: #059669 !important;
+    background: rgba(5, 150, 105, 0.08) !important;
+    font-weight: 600;
+  }
+  .filter-col-input::placeholder {
+    color: var(--text-faint);
+    font-size: 11px;
+    opacity: 0.85;
+  }
+  .btn-filter-reset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    width: 100%;
+    transition: all 0.15s ease;
+  }
+  .btn-filter-reset:hover {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: var(--danger-border);
+  }
+  .btn-filter-reset.has-active {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: var(--danger-border);
+    font-weight: 700;
+  }
+  .filter-stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(5, 150, 105, 0.15);
+    color: var(--accent-text);
+    font-size: 12px;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .stat-quick-btn {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+  }
+  .stat-quick-btn:hover {
+    filter: brightness(0.95);
+    transform: translateY(-1px);
+  }
+  .stat-quick-btn.active-pill {
+    background: var(--accent-btn) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-btn) !important;
+  }
+  .stat-quick-btn.active-pill strong {
+    color: #ffffff !important;
+  }
 </style>
 </head>
 <body>
@@ -719,14 +812,15 @@ Individual narxi — 1 899 000 so‘m. Eslatib o‘tay: kamida 1 ta real buyurtm
         <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;">
           <div>
             <span class="kicker">MIJOZLAR BAZASI VA SOTUV VORONKASI (CRM)</span>
-            <h2 class="h2" style="font-size:24px;margin:0;">Sana va vaqt ketma-ketligidagi mijozlar ro‘yxati</h2>
+            <h2 class="h2" style="font-size:24px;margin:0;">Sana va vaqt ketma-ketligidagi mijozlar ro‘yxati <span id="filterActiveBadge" class="filter-stat-badge" style="display:none;"></span></h2>
           </div>
           <div class="btn-row mono" style="font-size:12px;">
             <span class="live-indicator"><span class="live-dot"></span> LIVE CRM</span>
-            <span class="btn btn-outline">Jami: <strong id="statTotal">0</strong></span>
-            <span class="btn btn-outline" style="color:#059669;">Sotuv: <strong id="statSotuv">0</strong></span>
-            <span class="btn btn-outline" style="color:#D97706;">Jarayonda: <strong id="statJarayon">0</strong></span>
-            <span class="btn btn-outline" style="color:var(--danger-text);">Bo‘lmadi: <strong id="statBolmadi">0</strong></span>
+            <button type="button" class="btn btn-outline stat-quick-btn active-pill" data-filter="all" title="Barcha arizalar">Jami: <strong id="statTotal">0</strong></button>
+            <button type="button" class="btn btn-outline stat-quick-btn" data-filter="yangi" style="color:#059669;" title="Faqat yangi arizalarni filtrlash">Yangi: <strong id="statYangi">0</strong></button>
+            <button type="button" class="btn btn-outline stat-quick-btn" data-filter="sotuv" style="color:#059669;" title="Faqat sotuv bo‘lganlarni filtrlash">Sotuv: <strong id="statSotuv">0</strong></button>
+            <button type="button" class="btn btn-outline stat-quick-btn" data-filter="kutilmoqda" style="color:#D97706;" title="Faqat jarayondagilarni filtrlash">Jarayonda: <strong id="statJarayon">0</strong></button>
+            <button type="button" class="btn btn-outline stat-quick-btn" data-filter="sotuv_bolmadi" style="color:var(--danger-text);" title="Faqat sotuv bo‘lmaganlarni filtrlash">Bo‘lmadi: <strong id="statBolmadi">0</strong></button>
           </div>
         </div>
 
@@ -734,14 +828,58 @@ Individual narxi — 1 899 000 so‘m. Eslatib o‘tay: kamida 1 ta real buyurtm
           <table>
             <thead>
               <tr>
-                <th>#</th>
-                <th>Sana va vaqt</th>
-                <th>Mijoz va Telefon</th>
-                <th>Tarif</th>
-                <th>Holati (Aloqa)</th>
-                <th>Natija (Sotuv)</th>
-                <th>Izoh (Qo‘lda yozish)</th>
-                <th>Amallar</th>
+                <th style="width:45px;text-align:center;">#</th>
+                <th style="min-width:130px;">Sana va vaqt</th>
+                <th style="min-width:180px;">Mijoz va Telefon</th>
+                <th style="min-width:145px;">Tarif</th>
+                <th style="min-width:135px;">Holati (Aloqa)</th>
+                <th style="min-width:140px;">Natija (Sotuv)</th>
+                <th style="min-width:180px;">Izoh (Qo‘lda yozish)</th>
+                <th style="min-width:95px;text-align:center;">Amallar</th>
+              </tr>
+              <tr class="crm-filter-row">
+                <th style="text-align:center;padding:6px 6px;">
+                  <span title="Ustunlar bo‘yicha filtrlash" style="font-size:13px;opacity:0.75;">🔎</span>
+                </th>
+                <th style="padding:6px 6px;">
+                  <input type="text" id="colFilterDate" class="filter-col-input" placeholder="Sana/vaqt..." title="Sana va vaqt bo‘yicha qidirish" autocomplete="off" />
+                </th>
+                <th style="padding:6px 6px;">
+                  <input type="text" id="colFilterCustomer" class="filter-col-input" placeholder="Ism yoki telefon..." title="Ism yoki telefon raqami bo‘yicha qidirish" autocomplete="off" />
+                </th>
+                <th style="padding:6px 6px;">
+                  <select id="colFilterTariff" class="filter-col-select" title="Tarif bo‘yicha filtrlash">
+                    <option value="">Barcha tariflar</option>
+                    <option value="standart">Standart</option>
+                    <option value="premium">Premium</option>
+                    <option value="vip">VIP</option>
+                    <option value="individual">Individual</option>
+                  </select>
+                </th>
+                <th style="padding:6px 6px;">
+                  <select id="colFilterStatus" class="filter-col-select" title="Aloqa holati bo‘yicha filtrlash">
+                    <option value="">Barcha holatlar</option>
+                    <option value="yangi">Yangi</option>
+                    <option value="gaplashildi">Gaplashildi</option>
+                    <option value="oylab_koradi">O‘ylab ko‘radi</option>
+                    <option value="tolov_kutilmoqda">To‘lov kutilmoqda</option>
+                    <option value="qayta_aloqa">Qayta aloqa</option>
+                  </select>
+                </th>
+                <th style="padding:6px 6px;">
+                  <select id="colFilterResult" class="filter-col-select" title="Sotuv natijasi bo‘yicha filtrlash">
+                    <option value="">Barcha natijalar</option>
+                    <option value="kutilmoqda">Jarayonda (—)</option>
+                    <option value="sotuv">Sotuv ✓</option>
+                    <option value="sotuv_bolmadi">Sotuv bo‘lmadi ✕</option>
+                  </select>
+                </th>
+                <th style="padding:6px 6px;">
+                  <input type="text" id="colFilterNotes" class="filter-col-input" placeholder="Izohdan izlash..." title="Izoh matni bo‘yicha qidirish" autocomplete="off" />
+                </th>
+                <th style="text-align:center;padding:6px 6px;">
+                  <button type="button" id="resetColFiltersBtn" class="btn-filter-reset" title="Barcha filtrlarni tozalash">🔄 Tozalash</button>
+                </th>
               </tr>
             </thead>
             <tbody id="crmBody">
@@ -829,8 +967,119 @@ Individual narxi — 1 899 000 so‘m. Eslatib o‘tay: kamida 1 ta real buyurtm
       setTimeout(function() { btn.textContent = old; }, 1400);
     }
 
+    var colFilters = {
+      date: '',
+      customer: '',
+      tariff: '',
+      status: '',
+      result: '',
+      notes: ''
+    };
+
+    function hasActiveFilters() {
+      return Boolean(
+        colFilters.date ||
+        colFilters.customer ||
+        colFilters.tariff ||
+        colFilters.status ||
+        colFilters.result ||
+        colFilters.notes
+      );
+    }
+
+    function getFilteredLeads() {
+      if (!hasActiveFilters()) {
+        return allLeads;
+      }
+      return allLeads.filter(function(l) {
+        if (colFilters.date) {
+          var d = (l.createdAt || '').toLowerCase();
+          if (!d.includes(colFilters.date.toLowerCase())) return false;
+        }
+        if (colFilters.customer) {
+          var q = colFilters.customer.toLowerCase().trim();
+          var nameStr = (l.name || '').toLowerCase();
+          var phoneStr = (l.phone || '').toLowerCase();
+          var cleanPhone = phoneStr.replace(/[^0-9]/g, '');
+          var cleanQ = q.replace(/[^0-9]/g, '');
+          var match = nameStr.includes(q) || phoneStr.includes(q) || (cleanQ.length >= 3 && cleanPhone.includes(cleanQ));
+          if (!match) return false;
+        }
+        if (colFilters.tariff) {
+          if ((l.recommendedTariff || '').toLowerCase() !== colFilters.tariff.toLowerCase()) return false;
+        }
+        if (colFilters.status) {
+          if ((l.status || 'yangi').toLowerCase() !== colFilters.status.toLowerCase()) return false;
+        }
+        if (colFilters.result) {
+          if ((l.result || 'kutilmoqda').toLowerCase() !== colFilters.result.toLowerCase()) return false;
+        }
+        if (colFilters.notes) {
+          var n = (l.notes || '').toLowerCase();
+          if (!n.includes(colFilters.notes.toLowerCase())) return false;
+        }
+        return true;
+      });
+    }
+
+    function syncQuickPillHighlight() {
+      document.querySelectorAll('.stat-quick-btn').forEach(function(btn) {
+        var f = btn.getAttribute('data-filter');
+        var isActive = false;
+        if (f === 'all') {
+          isActive = !hasActiveFilters();
+        } else if (f === 'yangi') {
+          isActive = (colFilters.status === 'yangi' && !colFilters.result && !colFilters.tariff && !colFilters.date && !colFilters.customer && !colFilters.notes);
+        } else {
+          isActive = (colFilters.result === f && !colFilters.status && !colFilters.tariff && !colFilters.date && !colFilters.customer && !colFilters.notes);
+        }
+        if (isActive) {
+          btn.classList.add('active-pill');
+        } else {
+          btn.classList.remove('active-pill');
+        }
+      });
+    }
+
+    function onFilterChange() {
+      colFilters.date = (document.getElementById('colFilterDate') ? document.getElementById('colFilterDate').value : '').trim();
+      colFilters.customer = (document.getElementById('colFilterCustomer') ? document.getElementById('colFilterCustomer').value : '').trim();
+      colFilters.tariff = (document.getElementById('colFilterTariff') ? document.getElementById('colFilterTariff').value : '').trim();
+      colFilters.status = (document.getElementById('colFilterStatus') ? document.getElementById('colFilterStatus').value : '').trim();
+      colFilters.result = (document.getElementById('colFilterResult') ? document.getElementById('colFilterResult').value : '').trim();
+      colFilters.notes = (document.getElementById('colFilterNotes') ? document.getElementById('colFilterNotes').value : '').trim();
+
+      ['Date', 'Customer', 'Tariff', 'Status', 'Result', 'Notes'].forEach(function(key) {
+        var el = document.getElementById('colFilter' + key);
+        if (!el) return;
+        if (el.value && el.value.trim() !== '') {
+          el.classList.add('has-value');
+        } else {
+          el.classList.remove('has-value');
+        }
+      });
+
+      syncQuickPillHighlight();
+      renderCrm();
+    }
+
+    function resetAllColFilters() {
+      ['colFilterDate', 'colFilterCustomer', 'colFilterNotes'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) { el.value = ''; el.classList.remove('has-value'); }
+      });
+      ['colFilterTariff', 'colFilterStatus', 'colFilterResult'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) { el.value = ''; el.classList.remove('has-value'); }
+      });
+      colFilters = { date: '', customer: '', tariff: '', status: '', result: '', notes: '' };
+      syncQuickPillHighlight();
+      renderCrm();
+    }
+
     function updateStats(leads) {
       var total = leads.length;
+      var yangi = leads.filter(function(l) { return (l.status || 'yangi') === 'yangi'; }).length;
       var sotuv = leads.filter(function(l) { return l.result === 'sotuv'; }).length;
       var bolmadi = leads.filter(function(l) { return l.result === 'sotuv_bolmadi'; }).length;
       var jarayonda = leads.filter(function(l) { return (l.result || 'kutilmoqda') === 'kutilmoqda'; }).length;
@@ -839,6 +1088,9 @@ Individual narxi — 1 899 000 so‘m. Eslatib o‘tay: kamida 1 ta real buyurtm
       if (stTotal) stTotal.textContent = total;
       var topCount = document.getElementById('topCrmCount');
       if (topCount) topCount.textContent = total;
+
+      var stYangi = document.getElementById('statYangi');
+      if (stYangi) stYangi.textContent = yangi;
 
       var stSotuv = document.getElementById('statSotuv');
       if (stSotuv) stSotuv.textContent = sotuv;
@@ -865,6 +1117,30 @@ Individual narxi — 1 899 000 so‘m. Eslatib o‘tay: kamida 1 ta real buyurtm
       var tbody = document.getElementById('crmBody');
       if (!tbody) return;
 
+      var filtered = getFilteredLeads();
+      var active = hasActiveFilters();
+
+      var badge = document.getElementById('filterActiveBadge');
+      if (badge) {
+        if (active) {
+          badge.style.display = 'inline-flex';
+          badge.textContent = 'Filtr: ' + filtered.length + ' / ' + allLeads.length + ' ta';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+
+      var resetBtn = document.getElementById('resetColFiltersBtn');
+      if (resetBtn) {
+        if (active) {
+          resetBtn.classList.add('has-active');
+          resetBtn.textContent = '✕ Tozalash (' + filtered.length + ')';
+        } else {
+          resetBtn.classList.remove('has-active');
+          resetBtn.textContent = '🔄 Tozalash';
+        }
+      }
+
       if (allLeads.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:50px 16px;color:var(--text-muted);">' +
           '<div style="font-size:36px;margin-bottom:10px;">📥</div>' +
@@ -874,9 +1150,19 @@ Individual narxi — 1 899 000 so‘m. Eslatib o‘tay: kamida 1 ta real buyurtm
         return;
       }
 
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:45px 16px;color:var(--text-muted);">' +
+          '<div style="font-size:34px;margin-bottom:10px;">🔍</div>' +
+          '<div style="font-size:16px;font-weight:700;color:var(--text-main);">Filtr bo‘yicha hech qanday mijoz topilmadi</div>' +
+          '<div style="font-size:13px;margin-top:6px;">Tanlangan filtrlar bo‘yicha ma’lumot yo‘q. Filtrlarni tozalab ko‘ring.</div>' +
+          '<div style="margin-top:12px;"><button type="button" class="btn btn-outline" onclick="resetAllColFilters()" style="font-size:12px;padding:6px 14px;">🔄 Barcha filtrlarni tozalash</button></div>' +
+          '</td></tr>';
+        return;
+      }
+
       var html = '';
-      for (var i = 0; i < allLeads.length; i++) {
-        var l = allLeads[i];
+      for (var i = 0; i < filtered.length; i++) {
+        var l = filtered[i];
         var isNew = (newLeadId && l.id === newLeadId) || (Date.now() - (l.timestamp || 0) < 60000);
         var cleanPhone = (l.phone || '').replace(/[^0-9+]/g, '');
 
@@ -906,7 +1192,7 @@ Individual narxi — 1 899 000 so‘m. Eslatib o‘tay: kamida 1 ta real buyurtm
         }).join('');
 
         html += '<tr class="' + (isNew ? 'row-new' : '') + '">' +
-          '<td class="mono text-faint">' + (i + 1) + '</td>' +
+          '<td class="mono text-faint" style="text-align:center;">' + (i + 1) + '</td>' +
           '<td class="mono" style="white-space:nowrap;font-size:12px;">' + (l.createdAt || '') + '</td>' +
           '<td>' +
             '<div style="display:flex;align-items:center;gap:4px;">' +
@@ -952,8 +1238,18 @@ Individual narxi — 1 899 000 so‘m. Eslatib o‘tay: kamida 1 ta real buyurtm
         if (res.ok) {
           var data = await res.json();
           if (Array.isArray(data.leads)) {
-            allLeads = data.leads;
-            renderCrm();
+            var oldJson = JSON.stringify(allLeads);
+            var newJson = JSON.stringify(data.leads);
+            if (oldJson !== newJson) {
+              allLeads = data.leads;
+              var activeEl = document.activeElement;
+              var isEditingRow = activeEl && activeEl.closest && activeEl.closest('#crmBody');
+              if (!isEditingRow) {
+                renderCrm();
+              } else {
+                updateStats(allLeads);
+              }
+            }
           }
         }
       } catch(e) {
@@ -1109,7 +1405,47 @@ Individual narxi — 1 899 000 so‘m. Eslatib o‘tay: kamida 1 ta real buyurtm
       }
     } catch(e) {}
 
+    function attachFilterListeners() {
+      var textInputs = ['colFilterDate', 'colFilterCustomer', 'colFilterNotes'];
+      textInputs.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.addEventListener('input', onFilterChange);
+      });
+
+      var selectInputs = ['colFilterTariff', 'colFilterStatus', 'colFilterResult'];
+      selectInputs.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.addEventListener('change', onFilterChange);
+      });
+
+      var resetBtn = document.getElementById('resetColFiltersBtn');
+      if (resetBtn) resetBtn.addEventListener('click', resetAllColFilters);
+
+      document.querySelectorAll('.stat-quick-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var f = this.getAttribute('data-filter');
+          resetAllColFilters();
+          if (f === 'yangi') {
+            var sEl = document.getElementById('colFilterStatus');
+            if (sEl) {
+              sEl.value = 'yangi';
+              sEl.classList.add('has-value');
+              onFilterChange();
+            }
+          } else if (f !== 'all') {
+            var rEl = document.getElementById('colFilterResult');
+            if (rEl) {
+              rEl.value = f;
+              rEl.classList.add('has-value');
+              onFilterChange();
+            }
+          }
+        });
+      });
+    }
+
     attachTableDelegation();
+    attachFilterListeners();
     loadLeadsFromServer();
     connectEvents();
     setInterval(loadLeadsFromServer, 3000);
